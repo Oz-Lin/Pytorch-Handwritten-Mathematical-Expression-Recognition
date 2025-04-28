@@ -147,8 +147,8 @@ attn_decoder1 = AttnDecoderRNN(hidden_size,112,dropout_p=0.5)
 
 encoder = torch.nn.DataParallel(encoder, device_ids=gpu)
 attn_decoder1 = torch.nn.DataParallel(attn_decoder1, device_ids=gpu)
-encoder = encoder.cuda()
-attn_decoder1 = attn_decoder1.cuda()
+#encoder = encoder.cuda()
+#attn_decoder1 = attn_decoder1.cuda()
 
 encoder.load_state_dict(torch.load('model/encoder_lr0.00001_BN_te1_d05_SGD_bs8_mask_conv_bn_b.pkl'))
 attn_decoder1.load_state_dict(torch.load('model/attn_decoder_lr0.00001_BN_te1_d05_SGD_bs8_mask_conv_bn_b.pkl'))
@@ -192,8 +192,8 @@ for step_t, (x_t, y_t) in enumerate(test_loader):
         h_mask_t.append(h_comp_t)
         w_mask_t.append(w_comp_t)
 
-    x_t = x_t.cuda()
-    y_t = y_t.cuda()
+    x_t = x_t #.cuda()
+    y_t = y_t #.cuda()
     output_highfeature_t = encoder(x_t)
 
     x_mean_t = torch.mean(output_highfeature_t)
@@ -203,9 +203,9 @@ for step_t, (x_t, y_t) in enumerate(test_loader):
     dense_input = output_area_t1[2]
 
     decoder_input_t = torch.LongTensor([111]*batch_size_t)
-    decoder_input_t = decoder_input_t.cuda()
+    decoder_input_t = decoder_input_t #.cuda()
 
-    decoder_hidden_t = torch.randn(batch_size_t, 1, hidden_size).cuda()
+    decoder_hidden_t = torch.randn(batch_size_t, 1, hidden_size) #.cuda()
     decoder_hidden_t = decoder_hidden_t * x_mean_t
     decoder_hidden_t = torch.tanh(decoder_hidden_t)
 
@@ -216,8 +216,8 @@ for step_t, (x_t, y_t) in enumerate(test_loader):
     label_real = []
     prediction_real = []
 
-    decoder_attention_t = torch.zeros(batch_size_t,1,dense_input,output_area_t).cuda()
-    attention_sum_t = torch.zeros(batch_size_t,1,dense_input,output_area_t).cuda()
+    decoder_attention_t = torch.zeros(batch_size_t,1,dense_input,output_area_t) #.cuda()
+    attention_sum_t = torch.zeros(batch_size_t,1,dense_input,output_area_t) #.cuda()
 
     m = torch.nn.ZeroPad2d((0,maxlen-y_t.size()[1],0,0))
     y_t = m(y_t)
