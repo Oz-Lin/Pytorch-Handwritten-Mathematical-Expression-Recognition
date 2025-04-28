@@ -168,14 +168,14 @@ train_loader = torch.utils.data.DataLoader(
     batch_size = batch_size,
     shuffle = True,
     collate_fn = collate_fn,
-    num_workers=2,
+    num_workers=0,
     )
 test_loader = torch.utils.data.DataLoader(
     dataset = off_image_test,
     batch_size = batch_size_t,
     shuffle = True,
     collate_fn = collate_fn,
-    num_workers=2,
+    num_workers=0,
 )
 
 def my_train(target_length,attn_decoder1,
@@ -335,8 +335,8 @@ for epoch in range(200):
             h_mask.append(h_comp)
             w_mask.append(w_comp)
 
-        x = x.cuda()
-        y = y.cuda()
+        x = x #.cuda()
+        y = y #.cuda()
         # out is CNN featuremaps
         output_highfeature = encoder(x)
         x_mean=[]
@@ -354,8 +354,8 @@ for epoch in range(200):
         output_area = output_area1[3]
         dense_input = output_area1[2]
         target_length = y.size()[1]
-        attention_sum_init = torch.zeros(batch_size,1,dense_input,output_area).cuda()
-        decoder_attention_init = torch.zeros(batch_size,1,dense_input,output_area).cuda()
+        attention_sum_init = torch.zeros(batch_size,1,dense_input,output_area) #.cuda()
+        decoder_attention_init = torch.zeros(batch_size,1,dense_input,output_area) #.cuda()
 
         running_loss += my_train(target_length,attn_decoder1,output_highfeature,
                                 output_area,y,criterion,encoder_optimizer1,decoder_optimizer1,x_mean,dense_input,h_mask,w_mask,gpu,
