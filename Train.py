@@ -407,8 +407,8 @@ for epoch in range(200):
             h_mask_t.append(h_comp_t)
             w_mask_t.append(w_comp_t)
 
-        x_t = x_t.cuda()
-        y_t = y_t.cuda()
+        x_t = x_t #.cuda()
+        y_t = y_t #.cuda()
         output_highfeature_t = encoder(x_t)
 
         x_mean_t = torch.mean(output_highfeature_t)
@@ -418,8 +418,8 @@ for epoch in range(200):
         dense_input = output_area_t1[2]
 
         decoder_input_t = torch.LongTensor([111]*batch_size_t)
-        decoder_input_t = decoder_input_t.cuda()
-        decoder_hidden_t = torch.randn(batch_size_t, 1, hidden_size).cuda()
+        decoder_input_t = decoder_input_t #.cuda()
+        decoder_hidden_t = torch.randn(batch_size_t, 1, hidden_size) #.cuda()
         nn.init.xavier_uniform_(decoder_hidden_t)
 
         x_mean_t=[]
@@ -435,8 +435,8 @@ for epoch in range(200):
         #label = torch.zeros(batch_size_t,maxlen)
         prediction_sub = []
         label_sub = []
-        decoder_attention_t = torch.zeros(batch_size_t,1,dense_input,output_area_t).cuda()
-        attention_sum_t = torch.zeros(batch_size_t,1,dense_input,output_area_t).cuda()
+        decoder_attention_t = torch.zeros(batch_size_t,1,dense_input,output_area_t) #.cuda()
+        attention_sum_t = torch.zeros(batch_size_t,1,dense_input,output_area_t) #.cuda()
         flag_z_t = [0]*batch_size_t
         loss_t = 0
         m = torch.nn.ZeroPad2d((0,maxlen-y_t.size()[1],0,0))

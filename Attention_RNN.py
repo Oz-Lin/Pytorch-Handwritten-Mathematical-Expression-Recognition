@@ -168,4 +168,4 @@ class AttnDecoderRNN(nn.Module):
 
     def initHidden(self,batch_size):
         result = Variable(torch.randn(batch_size, 1, self.hidden_size))
-        return result.cuda()
+        return result #.cuda()
