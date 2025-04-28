@@ -44,9 +44,10 @@ def load_dict(dictFile):
     print('total words/phones',len(lexicon))
     return lexicon
 
-datasets=['./offline-train.pkl','./train_caption.txt']
-valid_datasets=['./offline-test.pkl', './test_caption.txt']
-dictionaries=['./dictionary.txt']
+datasets = ['C:/Users/OP9020/Documents/Pytorch-Handwritten-Mathematical-Expression-Recognition/offline-train.pkl', 'C:/Users/OP9020/Documents/Pytorch-Handwritten-Mathematical-Expression-Recognition/train_caption.txt']
+valid_datasets = ['C:/Users/OP9020/Documents/Pytorch-Handwritten-Mathematical-Expression-Recognition/offline-test.pkl', 'C:/Users/OP9020/Documents/Pytorch-Handwritten-Mathematical-Expression-Recognition/test_caption.txt']
+dictionaries = ['C:/Users/OP9020/Documents/Pytorch-Handwritten-Mathematical-Expression-Recognition/dictionary.txt']
+
 batch_Imagesize=500000
 valid_batch_Imagesize=500000
 # batch_size for training and testing
@@ -266,7 +267,8 @@ def my_train(target_length,attn_decoder1,
 encoder = densenet121()
 
 pthfile = r'densenet121-a639ec97.pth'
-pretrained_dict = torch.load(pthfile) 
+# pretrained_dict = torch.load(pthfile) 
+pretrained_dict = torch.load(pthfile, weights_only=True)
 encoder_dict = encoder.state_dict()
 pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in encoder_dict}
 encoder_dict.update(pretrained_dict)
@@ -274,10 +276,10 @@ encoder.load_state_dict(encoder_dict)
 
 attn_decoder1 = AttnDecoderRNN(hidden_size,112,dropout_p=0.5)
 
-encoder=encoder.cuda()
-attn_decoder1 = attn_decoder1.cuda()
-encoder = torch.nn.DataParallel(encoder, device_ids=gpu)
-attn_decoder1 = torch.nn.DataParallel(attn_decoder1, device_ids=gpu)
+#encoder=encoder.cuda()
+#attn_decoder1 = attn_decoder1.cuda()
+#encoder = torch.nn.DataParallel(encoder, device_ids=gpu)
+#ttn_decoder1 = torch.nn.DataParallel(attn_decoder1, device_ids=gpu)
 
 def imresize(im,sz):
     pil_im = Image.fromarray(im)
@@ -287,8 +289,8 @@ def imresize(im,sz):
 criterion = nn.NLLLoss()
 # encoder.load_state_dict(torch.load('model/encoder_lr0.00001_BN_te1_d05_SGD_bs8_mask_conv_bn_b.pkl'))
 # attn_decoder1.load_state_dict(torch.load('model/attn_decoder_lr0.00001_BN_te1_d05_SGD_bs8_mask_conv_bn_b.pkl'))
-decoder_input_init = torch.LongTensor([111]*batch_size).cuda()
-decoder_hidden_init = torch.randn(batch_size, 1, hidden_size).cuda()
+decoder_input_init = torch.LongTensor([111]*batch_size) #.cuda()
+decoder_hidden_init = torch.randn(batch_size, 1, hidden_size) #.cuda()
 nn.init.xavier_uniform_(decoder_hidden_init)
 
 # encoder_optimizer1 = torch.optim.Adam(encoder.parameters(), lr=lr_rate)

@@ -46,7 +46,7 @@ class AttnDecoderRNN(nn.Module):
 
         # batch_gpu must be an int object
         batch_gpu = int(batch_size/len(gpu))
-        et_mask = torch.zeros(batch_gpu,dense_input,bb).cuda()
+        et_mask = torch.zeros(batch_gpu,dense_input,bb) #.cuda()
 
         if et_mask.device == torch.device('cuda:0'):
             for i in range(batch_gpu):
