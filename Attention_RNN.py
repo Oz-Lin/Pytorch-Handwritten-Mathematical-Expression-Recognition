@@ -46,6 +46,8 @@ class AttnDecoderRNN(nn.Module):
 
         # batch_gpu must be an int object
         batch_gpu = int(batch_size/len(gpu))
+        # print ("batch_gpu:", batch_gpu)
+        # print ("len(gpu):", len(gpu))
         et_mask = torch.zeros(batch_gpu,dense_input,bb) #.cuda()
 
         if et_mask.device == torch.device('cuda:0'):
@@ -67,7 +69,13 @@ class AttnDecoderRNN(nn.Module):
         et_mask_4 = et_mask.unsqueeze(1)
 
         # embedding the word from 1 to 256(total 112 words)
-        embedded = self.embedding(input_a).view(batch_gpu,256)
+        #embedded = self.embedding(input_a).view(batch_gpu,256)
+        embedded = self.embedding(input_a)
+        batch_gpu = embedded.size(0) # make sure batch_gpu is correct with batch size
+        embedded = embedded.view(batch_gpu,-1)
+        # print debug
+        # print("input_a shape:", input_a.shape)
+        # print("embedding output shape:", self.embedding(input_a).shape)
         embedded = self.dropout(embedded)
         hidden = hidden.view(batch_gpu,self.hidden_size)
 
@@ -93,6 +101,14 @@ class AttnDecoderRNN(nn.Module):
         et_trans = torch.transpose(et,2,3)
         et_trans = torch.transpose(et_trans,1,2)
         et_trans = self.conv_tan(et_trans)
+        # print("et_trans shape:", et_trans.shape)
+        # print("et_mask_4 shape:", et_mask_4.shape)
+
+        # make sure the shape of et_mask_4 matches with et_trans
+        if et_mask_4.shape[0] != et_trans.shape[0]:
+            et_mask_4 = et_mask_4.repeat(et_trans.shape[0] // et_mask_4.shape[0], 1, 1, 1)
+
+        # multiply by element
         et_trans = et_trans*et_mask_4
         et_trans = self.bn1(et_trans)
         et_trans = torch.tanh(et_trans)
@@ -111,9 +127,15 @@ class AttnDecoderRNN(nn.Module):
 
         # et_div_all is attention alpha
         et_div_all = torch.zeros(batch_gpu,1,dense_input,bb)
-        et_div_all = et_div_all.cuda()
+        et_div_all = et_div_all #.cuda()
 
         et_exp = torch.exp(et)
+
+        # make sure the shape of et_mask matches with et_exp
+        if et_mask.shape[0] != et_exp.shape[0]:
+            et_mask = et_mask.repeat(et_exp.shape[0] // et_mask.shape[0], 1, 1)
+
+        # multiply by element
         et_exp = et_exp*et_mask
         et_sum = torch.sum(et_exp,dim=1)
         et_sum = torch.sum(et_sum,dim=1)
