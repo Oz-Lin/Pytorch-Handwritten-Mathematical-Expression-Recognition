@@ -367,14 +367,14 @@ for epoch in range(200):
             whole_loss += running_loss
             running_loss = running_loss/(batch_size*20)
             print('epoch is %d, lr rate is %.5f, te is %.3f, batch_size is %d, loading for %.3f%%, running_loss is %f' %(epoch,lr_rate,teacher_forcing_ratio, batch_size,pre,running_loss))
-            # with open("training_data/running_loss_%.5f_pre_GN_te05_d02_all.txt" %(lr_rate),"a") as f:
-            #     f.write("%s\n"%(str(running_loss)))
+            with open("training_data/running_loss_%.5f_pre_GN_te05_d02_all.txt" %(lr_rate),"a") as f:
+                f.write("%s\n"%(str(running_loss)))
             running_loss = 0
 
     loss_all_out = whole_loss / len_train
     print("epoch is %d, the whole loss is %f" % (epoch, loss_all_out))
-    # with open("training_data/whole_loss_%.5f_pre_GN_te05_d02_all.txt" % (lr_rate), "a") as f:
-    #     f.write("%s\n" % (str(loss_all_out)))
+    with open("training_data/whole_loss_%.5f_pre_GN_te05_d02_all.txt" % (lr_rate), "a") as f:
+        f.write("%s\n" % (str(loss_all_out)))
 
     # this is the prediction and compute wer loss
     total_dist = 0
@@ -507,9 +507,9 @@ for epoch in range(200):
     sacc = float(total_line_rec) / total_line
     print('wer is %.5f' % (wer))
     print('sacc is %.5f ' % (sacc))
-    # print('whole loss is %.5f'%(whole_loss_t/925))
-    # with open("training_data/wer_%.5f_pre_GN_te05_d02_all.txt" % (lr_rate), "a") as f:
-    #     f.write("%s\n" % (str(wer)))
+    print('whole loss is %.5f'%(whole_loss_t/925))
+    with open("training_data/wer_%.5f_pre_GN_te05_d02_all.txt" % (lr_rate), "a") as f:
+        f.write("%s\n" % (str(wer)))
 
     if (sacc > exprate):
         exprate = sacc
