@@ -44,9 +44,9 @@ def load_dict(dictFile):
     print('total words/phones',len(lexicon))
     return lexicon
 
-datasets = ['C:/Users/OP9020/Documents/Pytorch-Handwritten-Mathematical-Expression-Recognition/offline-train.pkl', 'C:/Users/OP9020/Documents/Pytorch-Handwritten-Mathematical-Expression-Recognition/train_caption.txt']
-valid_datasets = ['C:/Users/OP9020/Documents/Pytorch-Handwritten-Mathematical-Expression-Recognition/offline-test.pkl', 'C:/Users/OP9020/Documents/Pytorch-Handwritten-Mathematical-Expression-Recognition/test_caption.txt']
-dictionaries = ['C:/Users/OP9020/Documents/Pytorch-Handwritten-Mathematical-Expression-Recognition/dictionary.txt']
+datasets = ['./offline-train.pkl', './train_caption.txt']
+valid_datasets = ['./offline-test.pkl', './test_caption.txt']
+dictionaries = ['./dictionary.txt']
 
 batch_Imagesize=500000
 valid_batch_Imagesize=500000
@@ -62,7 +62,7 @@ hidden_size = 256
 # teacher_forcing_ratio 
 teacher_forcing_ratio = 1
 # change the gpu id 
-gpu = [0,1]
+gpu = [0]
 # learning rate
 lr_rate = 0.0001
 # flag to remember when to change the learning rate
@@ -276,10 +276,10 @@ encoder.load_state_dict(encoder_dict)
 
 attn_decoder1 = AttnDecoderRNN(hidden_size,112,dropout_p=0.5)
 
-#encoder=encoder.cuda()
-#attn_decoder1 = attn_decoder1.cuda()
-#encoder = torch.nn.DataParallel(encoder, device_ids=gpu)
-#ttn_decoder1 = torch.nn.DataParallel(attn_decoder1, device_ids=gpu)
+encoder=encoder.cuda()
+attn_decoder1 = attn_decoder1.cuda()
+encoder = torch.nn.DataParallel(encoder, device_ids=gpu)
+ttn_decoder1 = torch.nn.DataParallel(attn_decoder1, device_ids=gpu)
 
 def imresize(im,sz):
     pil_im = Image.fromarray(im)
@@ -287,10 +287,10 @@ def imresize(im,sz):
 
 
 criterion = nn.NLLLoss()
-# encoder.load_state_dict(torch.load('model/encoder_lr0.00001_BN_te1_d05_SGD_bs8_mask_conv_bn_b.pkl'))
-# attn_decoder1.load_state_dict(torch.load('model/attn_decoder_lr0.00001_BN_te1_d05_SGD_bs8_mask_conv_bn_b.pkl'))
-decoder_input_init = torch.LongTensor([111]*batch_size) #.cuda()
-decoder_hidden_init = torch.randn(batch_size, 1, hidden_size) #.cuda()
+#encoder.load_state_dict(torch.load('model/encoder_lr0.00001_BN_te1_d05_SGD_bs8_mask_conv_bn_b.pkl'))
+#attn_decoder1.load_state_dict(torch.load('model/attn_decoder_lr0.00001_BN_te1_d05_SGD_bs8_mask_conv_bn_b.pkl'))
+decoder_input_init = torch.LongTensor([111]*batch_size).cuda()
+decoder_hidden_init = torch.randn(batch_size, 1, hidden_size).cuda()
 nn.init.xavier_uniform_(decoder_hidden_init)
 
 # encoder_optimizer1 = torch.optim.Adam(encoder.parameters(), lr=lr_rate)
@@ -335,8 +335,8 @@ for epoch in range(200):
             h_mask.append(h_comp)
             w_mask.append(w_comp)
 
-        x = x #.cuda()
-        y = y #.cuda()
+        x = x.cuda()
+        y = y.cuda()
         # out is CNN featuremaps
         output_highfeature = encoder(x)
         x_mean=[]
@@ -354,8 +354,8 @@ for epoch in range(200):
         output_area = output_area1[3]
         dense_input = output_area1[2]
         target_length = y.size()[1]
-        attention_sum_init = torch.zeros(batch_size,1,dense_input,output_area) #.cuda()
-        decoder_attention_init = torch.zeros(batch_size,1,dense_input,output_area) #.cuda()
+        attention_sum_init = torch.zeros(batch_size,1,dense_input,output_area).cuda()
+        decoder_attention_init = torch.zeros(batch_size,1,dense_input,output_area).cuda()
 
         running_loss += my_train(target_length,attn_decoder1,output_highfeature,
                                 output_area,y,criterion,encoder_optimizer1,decoder_optimizer1,x_mean,dense_input,h_mask,w_mask,gpu,
@@ -407,8 +407,8 @@ for epoch in range(200):
             h_mask_t.append(h_comp_t)
             w_mask_t.append(w_comp_t)
 
-        x_t = x_t #.cuda()
-        y_t = y_t #.cuda()
+        x_t = x_t.cuda()
+        y_t = y_t.cuda()
         output_highfeature_t = encoder(x_t)
 
         x_mean_t = torch.mean(output_highfeature_t)
@@ -418,8 +418,8 @@ for epoch in range(200):
         dense_input = output_area_t1[2]
 
         decoder_input_t = torch.LongTensor([111]*batch_size_t)
-        decoder_input_t = decoder_input_t #.cuda()
-        decoder_hidden_t = torch.randn(batch_size_t, 1, hidden_size) #.cuda()
+        decoder_input_t = decoder_input_t.cuda()
+        decoder_hidden_t = torch.randn(batch_size_t, 1, hidden_size).cuda()
         nn.init.xavier_uniform_(decoder_hidden_t)
 
         x_mean_t=[]
@@ -435,8 +435,8 @@ for epoch in range(200):
         #label = torch.zeros(batch_size_t,maxlen)
         prediction_sub = []
         label_sub = []
-        decoder_attention_t = torch.zeros(batch_size_t,1,dense_input,output_area_t) #.cuda()
-        attention_sum_t = torch.zeros(batch_size_t,1,dense_input,output_area_t) #.cuda()
+        decoder_attention_t = torch.zeros(batch_size_t,1,dense_input,output_area_t).cuda()
+        attention_sum_t = torch.zeros(batch_size_t,1,dense_input,output_area_t).cuda()
         flag_z_t = [0]*batch_size_t
         loss_t = 0
         m = torch.nn.ZeroPad2d((0,maxlen-y_t.size()[1],0,0))

@@ -45,8 +45,8 @@ def for_test(x_t):
 
 	encoder = torch.nn.DataParallel(encoder, device_ids=gpu)
 	attn_decoder1 = torch.nn.DataParallel(attn_decoder1, device_ids=gpu)
-	#encoder = encoder.cuda()
-	#attn_decoder1 = attn_decoder1.cuda()
+	encoder = encoder.cuda()
+	attn_decoder1 = attn_decoder1.cuda()
 
 	encoder.load_state_dict(torch.load('../model/encoder_lr0.00001_BN_te1_d05_SGD_bs8_mask_conv_bn_b.pkl'))
 	attn_decoder1.load_state_dict(torch.load('../model/attn_decoder_lr0.00001_BN_te1_d05_SGD_bs8_mask_conv_bn_b.pkl'))
@@ -54,7 +54,7 @@ def for_test(x_t):
 	encoder.eval()
 	attn_decoder1.eval()
 
-	x_t = Variable(x_t) #.cuda())
+	x_t = Variable(x_t).cuda())
 	x_mask = torch.ones(x_t.size()[0],x_t.size()[1],x_t.size()[2],x_t.size()[3]).cuda()
 	x_t = torch.cat((x_t,x_mask),dim=1)
 	x_real_high = x_t.size()[2]
@@ -71,9 +71,9 @@ def for_test(x_t):
 	dense_input = output_area_t1[2]
 
 	decoder_input_t = torch.LongTensor([111]*batch_size_t)
-	#decoder_input_t = decoder_input_t.cuda()
+	decoder_input_t = decoder_input_t.cuda()
 
-	decoder_hidden_t = torch.randn(batch_size_t, 1, hidden_size) #.cuda()
+	decoder_hidden_t = torch.randn(batch_size_t, 1, hidden_size).cuda()
 	# nn.init.xavier_uniform_(decoder_hidden_t)
 	decoder_hidden_t = decoder_hidden_t * x_mean_t
 	decoder_hidden_t = torch.tanh(decoder_hidden_t)
@@ -82,13 +82,13 @@ def for_test(x_t):
 	#label = torch.zeros(batch_size_t,maxlen)
 	prediction_sub = []
 	label_sub = []
-	decoder_attention_t = torch.zeros(batch_size_t,1,dense_input,output_area_t) #.cuda()
-	attention_sum_t = torch.zeros(batch_size_t,1,dense_input,output_area_t) #.cuda()
+	decoder_attention_t = torch.zeros(batch_size_t,1,dense_input,output_area_t).cuda()
+	attention_sum_t = torch.zeros(batch_size_t,1,dense_input,output_area_t).cuda()
 	decoder_attention_t_cat = []
 
 
 	for i in range(maxlen):
-	    decoder_output, decoder_hidden_t, decoder_attention_t, attention_sum_t = attn_decoder1(decoder_input_t,
+		decoder_output, decoder_hidden_t, decoder_attention_t, attention_sum_t = attn_decoder1(decoder_input_t,
 	                                                                                     decoder_hidden_t,
 	                                                                                     output_highfeature_t,
 	                                                                                     output_area_t,
@@ -96,15 +96,15 @@ def for_test(x_t):
 	                                                                                     decoder_attention_t,dense_input,batch_size_t,h_mask_t,w_mask_t,gpu)
 
 	    
-	    decoder_attention_t_cat.append(decoder_attention_t[0].data.cpu().numpy())
-	    topv,topi = torch.max(decoder_output,2)
-	    if torch.sum(topi)==0:
-	        break
-	    decoder_input_t = topi
-	    decoder_input_t = decoder_input_t.view(batch_size_t)
+		decoder_attention_t_cat.append(decoder_attention_t[0].data.cpu().numpy())
+		topv,topi = torch.max(decoder_output,2)
+		if torch.sum(topi)==0:
+			break
+		decoder_input_t = topi
+		decoder_input_t = decoder_input_t.view(batch_size_t)
 
 	    # prediction
-	    prediction[:,i] = decoder_input_t
+		prediction[:,i] = decoder_input_t
 
 
 	k = numpy.array(decoder_attention_t_cat)
